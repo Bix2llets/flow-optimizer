@@ -26,8 +26,16 @@ cvxpy_testing_function()
 
 
 def optimize_layer(
-    current_layer: list[Node], prev_layer: list[Node], connecting_edge: list[Link]
+    nodes: NodeCollection,
+    links: LinkCollection,
+    current_index: int,
+    previous_index: int,
+    link_index: int,
 ):
+    connecting_edge = links.get_layer(link_index)
+
+    current_layer = nodes.get_layer(current_index)
+    previous_layer = nodes.get_layer(previous_index)
     constraints = []
     edge_value = cp.Variable(len(connecting_edge))
     # NOTE: Set objective function
@@ -54,15 +62,15 @@ def optimize_layer(
 
     # NOTE: Add the constraint of matching previous layer's output
     compress_map = {}
-    for node in prev_layer:
+    for node in previous_layer:
         if node.id in compress_map:
             pass
         else:
             compress_map[node.id] = len(compress_map)
 
-    prev_output_vector = [node.output.actual_value for node in prev_layer]
-    output_mul_matrix = np.zeros((len(prev_layer), len(connecting_edge)))
-    for node in prev_layer:
+    prev_output_vector = [node.output.actual_value for node in previous_layer]
+    output_mul_matrix = np.zeros((len(previous_layer), len(connecting_edge)))
+    for node in previous_layer:
         row = compress_map[node.id]
         for col, edge in enumerate(connecting_edge):
             if edge.start_id == node.id:
@@ -88,15 +96,13 @@ def run_test():
     nodes.add_nodes(2, 2, 3, 4, 2)
     nodes.add_nodes(id=3, layer_id=1, input_cap=4, output_cap=2, process=2)
 
-    links.add_link(3, 1, 1, 2)
-    links.add_link(10, 1, 3, 2)
+    links.add_link(4, 1, 1, 2)
+    links.add_link(2, 1, 3, 2)
 
     nodes.get_node(1).output.actual_value = 3
-    nodes.get_node(3).output.actual_value = 1
+    nodes.get_node(3).output.actual_value = 2
     print(nodes.get_layer(1))
-    optimized = optimize_layer(
-        nodes.get_layer(2), nodes.get_layer(1), links.get_layer(1)
-    )
+    optimized = optimize_layer(nodes, links, 2, 1, 1)
     print(optimized.value)
 
     pass
