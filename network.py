@@ -24,9 +24,8 @@ class Link:
 
 
 class NodeCollection:
-    def __init__(self, layer_id):
+    def __init__(self):
         self.nodes: list[Node] = []
-        self.layer_id = layer_id
 
     def is_layer_blank(self, layer):
         for node in self.nodes:
@@ -51,11 +50,19 @@ class NodeCollection:
         )
         self.nodes.append(new_node)
 
+    def get_node(self, id: int) -> Node:
+        for node in self.nodes:
+            if node.id == id:
+                return node
+        return self.nodes[0]
+
+    def get_layer(self, id) -> list[Node]:
+        return [element for element in self.nodes if element.layer_id == id]
+
 
 class LinkCollection:
-    def __init__(self, layer_id):
+    def __init__(self):
         self.links: list[Link] = []
-        self.layer_id = layer_id
 
     def is_blank(self):
         return len(self.links) == 0
