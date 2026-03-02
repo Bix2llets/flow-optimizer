@@ -55,7 +55,18 @@ def optimize_layer(
     objective_function = cp.Minimize(network_congestion)
 
     # NOTE: Bound the flow between 0 and bandwidth (both inclusive)
-    edge_cap = np.array([link.flow.cap_value for link in connecting_edge])
+    edge_cap = np.array(
+        [
+            min(
+                [
+                    link.flow.cap_value,
+                    nodes.get_node(link.end_id).input.cap_value,
+                    nodes.get_node(link.start_id).output.cap_value,
+                ]
+            )
+            for link in connecting_edge
+        ]
+    )
 
     constraints.append(0 <= edge_value)
     constraints.append(edge_value <= edge_cap)
@@ -68,7 +79,15 @@ def optimize_layer(
         else:
             compress_map[node.id] = len(compress_map)
 
-    prev_output_vector = [node.output.actual_value for node in previous_layer]
+    prev_output_vector = [
+        min(
+            [
+                node.output.actual_value,
+                sum([link.flow.cap_value for link in links.get_starts_at(node.id)]),
+            ]
+        )
+        for node in previous_layer
+    ]
     output_mul_matrix = np.zeros((len(previous_layer), len(connecting_edge)))
     for node in previous_layer:
         row = compress_map[node.id]
@@ -96,7 +115,7 @@ def run_test():
     nodes.add_nodes(2, 2, 3, 4, 2)
     nodes.add_nodes(id=3, layer_id=1, input_cap=4, output_cap=2, process=2)
 
-    links.add_link(4, 1, 1, 2)
+    links.add_link(2, 1, 1, 2)
     links.add_link(2, 1, 3, 2)
 
     nodes.get_node(1).output.actual_value = 3
