@@ -4,27 +4,6 @@ from network import Node, Link
 from network import NodeCollection, LinkCollection
 
 
-def cvxpy_testing_function():
-    A = np.random.randint(-10, 10, (2, 3))
-    x = cp.Variable(3)
-    B = np.random.randint(0, 10, 2)
-
-    objective_func = cp.Minimize(cp.sum_squares(A @ x - B))
-
-    constraints = [0 <= x, x <= 10]
-    problem = cp.Problem(objective_func, constraints)
-    problem.solve()
-
-    # print(x.value)
-    # print(A)
-    # print(B)
-
-    pass
-
-
-cvxpy_testing_function()
-
-
 def optimize_layer(
     nodes: NodeCollection,
     links: LinkCollection,
@@ -54,7 +33,7 @@ def optimize_layer(
     network_congestion = cp.sum(target_capabilities @ edge_value)
     objective_function = cp.Minimize(network_congestion)
 
-    # NOTE: Bound the flow between 0 and bandwidth (both inclusive)
+    # NOTE: Bound the flow between 0 and cap of current flow, prev output and next input (both inclusive)
     edge_cap = np.array(
         [
             min(
