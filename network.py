@@ -1,12 +1,12 @@
 class Capped:
-    def __init__(self, cap_value=0, actual_value=0):
+    def __init__(self, cap_value: float = 0, actual_value: float = 0):
         self.cap_value = cap_value
         self.actual_value = actual_value
 
 
 class Node:
     def __init__(
-        self, id: int, layer_id: int, input: Capped, output: Capped, process: int
+        self, id: int, layer_id: int, input: Capped, output: Capped, process: float
     ):
         self.layer_id = layer_id
         self.id = id
@@ -34,7 +34,7 @@ class NodeCollection:
         return False
 
     def add_nodes(
-        self, id: int, layer_id: int, input_cap: int, output_cap: int, process: int
+        self, id: int, layer_id: int, input_cap: int, output_cap: int, process: float
     ):
         for node in self.nodes:
             if node.id == id:
@@ -67,7 +67,7 @@ class LinkCollection:
     def is_blank(self):
         return len(self.links) == 0
 
-    def add_link(self, bandwidth: int, layer_id: int, start_id: int, end_id: int):
+    def add_link(self, bandwidth: float, layer_id: int, start_id: int, end_id: int):
         for link in self.links:
             if link.start_id == start_id and link.end_id == end_id:
                 print("Existing link")

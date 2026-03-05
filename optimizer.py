@@ -114,18 +114,21 @@ def run_test():
     nodes = NodeCollection()
     links = LinkCollection()
 
-    nodes.add_nodes(1, 1, 3, 3, 4)
-    nodes.add_nodes(2, 2, 3, 4, 2)
+    nodes.add_nodes(id=1, layer_id=1, input_cap=3, output_cap=3, process=4)
+    nodes.add_nodes(id=2, layer_id=2, input_cap=3, output_cap=4, process=2)
     nodes.add_nodes(id=3, layer_id=1, input_cap=4, output_cap=2, process=2)
+    nodes.add_nodes(id=4, layer_id=2, input_cap=3, output_cap=3, process=9)
 
-    links.add_link(1, 1, 1, 2)
-    links.add_link(2, 1, 3, 2)
+    links.add_link(bandwidth=1, layer_id=1, start_id=1, end_id=2)
+    links.add_link(bandwidth=2, layer_id=1, start_id=3, end_id=2)
+    links.add_link(bandwidth=3, layer_id=1, start_id=1, end_id=4)
 
-    nodes.get_node(1).output.actual_value = 3
-    nodes.get_node(3).output.actual_value = 2
+    # NOTE: This focuses all flows into the
+    nodes.get_node(1).output.actual_value = 3.5
+    nodes.get_node(3).output.actual_value = 2.5
     print(nodes.get_layer(1))
     optimized = optimize_layer(nodes, links, 2, 1, 1)
-    print(optimized.value)
+    print(f"Test result: optimized.value = {optimized.value}")
 
     pass
 
