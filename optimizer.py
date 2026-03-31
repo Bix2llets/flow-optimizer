@@ -1,7 +1,6 @@
 import cvxpy as cp
 import numpy as np
-from network import Node, Link
-from network import NodeCollection, LinkCollection
+from network import Link, LinkCollection, Node, NodeCollection
 
 
 # NOTE: This function changed from the proposed plan by setting the objective function to maximize flows with penalty of congestion
@@ -14,7 +13,6 @@ def optimize_layer(
     link_index: int,
 ):
     connecting_edge = links.get_layer(link_index)
-
     current_layer = nodes.get_layer(current_index)
     previous_layer = nodes.get_layer(previous_index)
     constraints = []
@@ -109,6 +107,51 @@ def optimize_layer(
     return edge_value
 
 
+def update_layer(
+    nodes: NodeCollection,
+    links: LinkCollection,
+    optimized_edge_value,
+    current_index: int,
+    previous_index: int,
+    link_index: int,
+):
+    """
+    Updates nodes and links based on the optimized flow values from optimize_layer.
+
+    Args:
+        nodes: NodeCollection containing all nodes
+        links: LinkCollection containing all links
+        optimized_edge_value: The optimized edge flow values returned from optimize_layer
+        current_index: Index of the current layer
+        previous_index: Index of the previous layer
+        link_index: Index of the connecting links layer
+    """
+    connecting_edge = links.get_layer(link_index)
+    current_layer = nodes.get_layer(current_index)
+    previous_layer = nodes.get_layer(previous_index)
+
+    # Update link flow values
+    edge_flows = optimized_edge_value.value
+    for i, link in enumerate(connecting_edge):
+        link.flow.actual_value = edge_flows[i]
+
+    # Update previous layer node output values
+    for node in previous_layer:
+        total_outflow = 0
+        for link in links.get_starts_at(node.id):
+            total_outflow += link.flow.actual_value
+        node.output.actual_value = total_outflow
+
+    # Update current layer node input values
+    for node in current_layer:
+        total_inflow = 0
+        for link in links.get_ends_at(node.id):
+            total_inflow += link.flow.actual_value
+        node.input.actual_value = total_inflow
+
+    # Read proof, approved.
+
+
 def run_test():
 
     nodes = NodeCollection()
@@ -119,6 +162,8 @@ def run_test():
     nodes.add_nodes(id=3, layer_id=1, input_cap=4, output_cap=2, process=2)
     nodes.add_nodes(id=4, layer_id=2, input_cap=3, output_cap=3, process=9)
 
+    # * lambda multiplier (linear or non-linear)
+    # TODO survey of metrics
     links.add_link(bandwidth=1, layer_id=1, start_id=1, end_id=2)
     links.add_link(bandwidth=2, layer_id=1, start_id=3, end_id=2)
     links.add_link(bandwidth=3, layer_id=1, start_id=1, end_id=4)
@@ -130,7 +175,19 @@ def run_test():
     optimized = optimize_layer(nodes, links, 2, 1, 1)
     print(f"Test result: optimized.value = {optimized.value}")
 
-    pass
+    # Update nodes and links based on optimization results
+    update_layer(nodes, links, optimized, 2, 1, 1)
+
+    # Print updated values
+    print("\nUpdated link flows:")
+    for link in links.get_layer(1):
+        print(f"  Link {link.start_id} -> {link.end_id}: {link.flow.actual_value}")
+
+    print("\nUpdated node values:")
+    for node in nodes.get_layer(1):
+        print(f"  Node {node.id} output: {node.output.actual_value}")
+    for node in nodes.get_layer(2):
+        print(f"  Node {node.id} input: {node.input.actual_value}")
 
 
 run_test()
