@@ -28,4 +28,10 @@ def graph_loader(yaml_file) -> tuple[NodeCollection, LinkCollection]:
             output_cap=node["output_cap"],
             process=node["process"],
         )
+        input_value = node.get("initial_input", 0)
+        if input_value > 0:
+            nodes.get_node(node["id"]).input.actual_value = input_value
+        # print(
+        #     f"Initial input for node {node['id']}: {nodes.get_node(node['id']).input.actual_value}"
+        # )
     return (nodes, links)

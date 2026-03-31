@@ -27,7 +27,7 @@ def optimize_layer(
         current_query_dict[value.id] = value
 
     target_capabilities = []
-    print(current_query_dict)
+    # print(current_query_dict)
     for edge in connecting_edge:
         target_node_id = edge.end_id
         target_node = current_query_dict[target_node_id]
@@ -63,15 +63,12 @@ def optimize_layer(
         else:
             prev_output_compress_map[node.id] = len(prev_output_compress_map)
 
-    prev_output_vector = [
-        min(
-            [
-                node.output.actual_value,
-                sum([link.flow.cap_value for link in links.get_starts_at(node.id)]),
-            ]
+    for node in previous_layer:
+        node.output.actual_value = min(
+            node.input.actual_value,
+            sum([link.flow.cap_value for link in links.get_starts_at(node.id)]),
         )
-        for node in previous_layer
-    ]
+    prev_output_vector = [node.output.actual_value for node in previous_layer]
     output_mul_matrix = np.zeros((len(previous_layer), len(connecting_edge)))
     for node in previous_layer:
         row = prev_output_compress_map[node.id]
@@ -79,9 +76,9 @@ def optimize_layer(
             if edge.start_id == node.id:
                 output_mul_matrix[row, col] = 1
 
-    print(f"output_mul_matrix\n{output_mul_matrix}")
-    print(f"edge_value\n{edge_value}")
-    print(f"prev_output_vector\n{prev_output_vector}")
+    # print(f"output_mul_matrix\n{output_mul_matrix}")
+    # print(f"edge_value\n{edge_value}")
+    # print(f"prev_output_vector\n{prev_output_vector}")
     constraints.append(output_mul_matrix @ edge_value <= prev_output_vector)
 
     # NOTE: Add the constraint of satisfying the next layer's input
@@ -99,13 +96,13 @@ def optimize_layer(
 
     curr_input_cap_vector = [node.input.cap_value for node in current_layer]
 
-    print(f"Input mul matrix: {input_mul_matrix}")
-    print(f"curr_input_cap_vector: {curr_input_cap_vector}")
+    # print(f"Input mul matrix: {input_mul_matrix}")
+    # print(f"curr_input_cap_vector: {curr_input_cap_vector}")
     constraints.append(input_mul_matrix @ edge_value <= curr_input_cap_vector)
     # NOTE: Solve the problem
     problem = cp.Problem(objective_function, constraints)
     problem.solve()
-    print(edge_value)
+    print(edge_value.value)
 
     return edge_value
 
