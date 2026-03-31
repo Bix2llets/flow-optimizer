@@ -1,5 +1,6 @@
 from bitmask import Bitmask
 from graph_loader import graph_loader
+from metric import flow_fairness_metric
 from network import Link, LinkCollection, Node, NodeCollection
 from optimizer import optimize_layer, update_layer
 
@@ -17,3 +18,13 @@ for layer_id in range(0, max_layer_id - 1):
     )
 nodes.print_nodes_info()
 links.print_links_info()
+
+flow_fairness_list = []
+for node in nodes.dump_nodes():
+    output_flow = []
+    id = node.id
+    for link in links.get_starts_at(id):
+        output_flow.append(link.flow.actual_value)
+    flow_fairness_list.append(float(flow_fairness_metric(output_flow=output_flow)))
+
+print(flow_fairness_list)
