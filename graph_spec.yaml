@@ -10,5 +10,5 @@ flow_min: 4
 flow_max: 10
 min_process: 2
 max_process: 5
-link_chance: 0.3
-seed: 0
+link_chance: 1 
+seed: 1

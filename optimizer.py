@@ -1,5 +1,6 @@
 import cvxpy as cp
 import numpy as np
+
 from network import Link, LinkCollection, Node, NodeCollection
 
 
@@ -12,6 +13,7 @@ def optimize_layer(
     previous_index: int,
     link_index: int,
 ):
+    print(f"Working on {previous_index} -> {current_index}")
     connecting_edge = links.get_layer(link_index)
     current_layer = nodes.get_layer(current_index)
     previous_layer = nodes.get_layer(previous_index)
@@ -25,6 +27,7 @@ def optimize_layer(
         current_query_dict[value.id] = value
 
     target_capabilities = []
+    print(current_query_dict)
     for edge in connecting_edge:
         target_node_id = edge.end_id
         target_node = current_query_dict[target_node_id]
@@ -194,4 +197,5 @@ def run_test():
 
 
 # ! Comparison baseline: networkX
-run_test()
+if __name__ == "__main__":
+    run_test()

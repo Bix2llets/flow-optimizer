@@ -96,10 +96,11 @@ def create_graph(graph_info: GraphInfo):
         current_layer_nodes = node_list.get_layer(layer)
         next_layer_nodes = node_list.get_layer(layer + 1)
 
+        print(f"Generating links between layer {layer} and layer{layer + 1}")
         for start_node in current_layer_nodes:
             for end_node in next_layer_nodes:
                 # Randomly decide whether to create a link from start_node to end_node
-                if rng.random() < graph_info.link_chance:
+                if rng.random() <= graph_info.link_chance:
                     flow_cap = rng.integers(
                         graph_info.min_flow, graph_info.max_flow, dtype=int
                     )
@@ -107,6 +108,7 @@ def create_graph(graph_info: GraphInfo):
                     link_list.add_link(
                         float(flow_cap), layer, start_node.id, end_node.id
                     )
+                    print("Added links")
 
     return (node_list, link_list)
 
@@ -120,8 +122,8 @@ def print_graph(output_file_name, graph_info: GraphInfo):
                     {
                         "id": node.id,
                         "layer_id": node.layer_id,
-                        "input_cap_value": node.input.cap_value,
-                        "output_cap_value": node.output.cap_value,
+                        "input_cap": node.input.cap_value,
+                        "output_cap": node.output.cap_value,
                         "process": node.process,
                     }
                     for node in nodes.dump_nodes()
@@ -131,7 +133,7 @@ def print_graph(output_file_name, graph_info: GraphInfo):
                         "layer_id": link.layer_id,
                         "start_id": link.start_id,
                         "end_id": link.end_id,
-                        "flow_cap_value": link.flow.cap_value,
+                        "bandwidth": link.flow.cap_value,
                     }
                     for link in links.dump_links()
                 ],
