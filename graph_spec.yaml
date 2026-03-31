@@ -1,0 +1,14 @@
+name: graph_1
+layers: 6
+min_node: 1
+max_node: 8
+input_min: 3
+input_max: 6
+output_max: 6
+output_min: 3
+flow_min: 4
+flow_max: 10
+min_process: 2
+max_process: 5
+link_chance: 0.3
+seed: 0

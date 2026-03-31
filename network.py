@@ -59,6 +59,15 @@ class NodeCollection:
     def get_layer(self, id) -> list[Node]:
         return [element for element in self.nodes if element.layer_id == id]
 
+    def print_nodes_info(self):
+        for node in self.nodes:
+            print(
+                f"Node {node.id}, layer {node.layer_id}, input cap {node.input.cap_value}, output cap {node.output.cap_value}, process {node.process}, actual input {node.input.actual_value}, actual output {node.output.actual_value}"
+            )
+
+    def dump_nodes(self):
+        return self.nodes
+
 
 class LinkCollection:
     def __init__(self):
@@ -83,3 +92,12 @@ class LinkCollection:
 
     def get_ends_at(self, end_id):
         return [link for link in self.links if link.end_id == end_id]
+
+    def print_links_info(self):
+        for link in self.links:
+            print(
+                f"Link from {link.start_id} to {link.end_id} with bandwidth {link.flow.cap_value} and actual flow {link.flow.actual_value}"
+            )
+
+    def dump_links(self):
+        return self.links

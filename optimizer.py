@@ -189,5 +189,9 @@ def run_test():
     for node in nodes.get_layer(2):
         print(f"  Node {node.id} input: {node.input.actual_value}")
 
+    nodes.print_nodes_info()
+    links.print_links_info()
 
+
+# ! Comparison baseline: networkX
 run_test()
